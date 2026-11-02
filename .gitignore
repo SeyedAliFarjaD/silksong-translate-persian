@@ -1,0 +1,23 @@
+# Build and compiled artifacts
+**/bin/
+**/obj/
+*.log
+
+# Temporary, research and third-party vendor files
+.rea-setup/
+remote_repo/
+__pycache__/
+*.pyc
+silksong-fa/decomp/
+silksong-fa/raw/
+silksong-fa/text/
+silksong-fa/vendor/
+silksong-fa/mod/_parked/
+
+# Distribution archives (published via GitHub Releases)
+*.zip
+
+# IDE and OS
+.vs/
+.vscode/
+Thumbs.db

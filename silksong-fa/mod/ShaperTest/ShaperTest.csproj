@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>disable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <AssemblyName>ShaperTest</AssemblyName>
+    <RootNamespace>SilksongPersian</RootNamespace>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Compile the real shaper so the test exercises exactly what the plugin ships. -->
+    <Compile Include="Program.cs" />
+    <Compile Include="..\SilksongPersian\PersianText.cs" />
+  </ItemGroup>
+
+</Project>

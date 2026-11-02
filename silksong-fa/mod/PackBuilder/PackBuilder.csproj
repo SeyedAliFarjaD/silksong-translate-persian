@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>disable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <AssemblyName>PackBuilder</AssemblyName>
+    <RootNamespace>PackBuilder</RootNamespace>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="Program.cs" />
+    <!-- The exact shaper the plugin shipped, so the pack matches tested behaviour. -->
+    <Compile Include="..\SilksongPersian\PersianText.cs" />
+  </ItemGroup>
+
+</Project>
