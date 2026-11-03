@@ -92,6 +92,73 @@ namespace SilksongPersian
             }
         }
 
+        private static TMProOld.TMP_FontAsset _persianTmProOldFont;
+
+        /// <summary>
+        /// Finds the TMProOld Persian font asset in memory (loaded by CustomTranslation/CustomFont).
+        /// </summary>
+        internal static TMProOld.TMP_FontAsset GetPersianTmProOldFont()
+        {
+            if (_persianTmProOldFont != null) return _persianTmProOldFont;
+
+            try
+            {
+                var assets = Resources.FindObjectsOfTypeAll<TMProOld.TMP_FontAsset>();
+                foreach (var asset in assets)
+                {
+                    if (asset == null) continue;
+                    var dict = asset.characterDictionary;
+                    if (dict != null && (dict.ContainsKey(0xFE91) || dict.ContainsKey(0x0628) || dict.ContainsKey(0xFB8A)))
+                    {
+                        _persianTmProOldFont = asset;
+                        Plugin.Log.LogInfo($"Found TMProOld Persian font asset: {asset.name}");
+                        break;
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                Plugin.Log.LogWarning($"Failed to search TMProOld font assets: {e.Message}");
+            }
+
+            return _persianTmProOldFont;
+        }
+
+        /// <summary>
+        /// Ensures TMProOld components and TMP_Settings have the Persian font registered as fallback.
+        /// </summary>
+        internal static void EnsureTmProOldFallback(TMProOld.TMP_Text textComponent)
+        {
+            var persianFont = GetPersianTmProOldFont();
+            if (persianFont == null) return;
+
+            try
+            {
+                var fallbacks = TMProOld.TMP_Settings.fallbackFontAssets;
+                if (fallbacks != null && !fallbacks.Contains(persianFont))
+                {
+                    fallbacks.Add(persianFont);
+                }
+            }
+            catch { }
+
+            try
+            {
+                if (textComponent != null && textComponent.font != null && textComponent.font != persianFont)
+                {
+                    if (textComponent.font.fallbackFontAssets == null)
+                    {
+                        textComponent.font.fallbackFontAssets = new List<TMProOld.TMP_FontAsset>();
+                    }
+                    if (!textComponent.font.fallbackFontAssets.Contains(persianFont))
+                    {
+                        textComponent.font.fallbackFontAssets.Add(persianFont);
+                    }
+                }
+            }
+            catch { }
+        }
+
         /// <summary>
         /// Intercept text assignments on TMProOld text components.
         /// </summary>
@@ -101,7 +168,21 @@ namespace SilksongPersian
 
             if (PersianText.ContainsPersian(value) || PersianText.HasPresentationForms(value))
             {
-                __instance.alignment = ToRightAlignment(__instance.alignment);
+                EnsureTmProOldFallback(__instance);
+
+                // PromptMarker label must ALWAYS remain Left aligned next to the button icon!
+                if (__instance.GetComponentInParent<PromptMarker>() != null)
+                {
+                    __instance.alignment = TMProOld.TextAlignmentOptions.Left;
+                    return;
+                }
+
+                // Only convert Left alignment to Right for multi-line paragraphs!
+                // Single-line text (prompts, buttons, inline labels) retains original alignment.
+                if (value.Contains('\n') || value.Contains("<br>"))
+                {
+                    __instance.alignment = ToRightAlignment(__instance.alignment);
+                }
             }
         }
 
@@ -114,24 +195,76 @@ namespace SilksongPersian
 
             if (PersianText.ContainsPersian(text) || PersianText.HasPresentationForms(text))
             {
-                __instance.alignment = ToRightAlignment(__instance.alignment);
+                EnsureTmProOldFallback(__instance);
+
+                if (__instance.GetComponentInParent<PromptMarker>() != null)
+                {
+                    __instance.alignment = TMProOld.TextAlignmentOptions.Left;
+                    return;
+                }
+
+                if (text.Contains('\n') || text.Contains("<br>"))
+                {
+                    __instance.alignment = ToRightAlignment(__instance.alignment);
+                }
             }
         }
 
         /// <summary>
         /// Intercept alignment setter on TMProOld text components.
-        /// If the component currently holds Persian text, map Left alignments to Right.
+        /// If the component currently holds Persian text, map Left alignments to Right only for multi-line text.
         /// </summary>
         internal static void TmProOldSetAlignmentPrefix(TMProOld.TMP_Text __instance, ref TMProOld.TextAlignmentOptions value)
         {
             if (__instance == null) return;
+
+            if (__instance.GetComponentInParent<PromptMarker>() != null)
+            {
+                value = TMProOld.TextAlignmentOptions.Left;
+                return;
+            }
+
             string txt = __instance.text;
             if (string.IsNullOrEmpty(txt)) return;
 
-            if (PersianText.ContainsPersian(txt) || PersianText.HasPresentationForms(txt))
+            if ((PersianText.ContainsPersian(txt) || PersianText.HasPresentationForms(txt)) &&
+                (txt.Contains('\n') || txt.Contains("<br>")))
             {
                 value = ToRightAlignment(value);
             }
+        }
+
+        /// <summary>
+        /// FixVerticalAlign sets lineSpacing = -0.33f on UnityEngine.UI.Text for English font baseline tweaks.
+        /// On Persian text (especially multi-line descriptions), negative line spacing crushes lines together.
+        /// Ensure lineSpacing stays positive (1.05f) and prevent adding '\n'.
+        /// </summary>
+        internal static bool FixVerticalAlignPrefix(FixVerticalAlign __instance)
+        {
+            if (__instance == null) return true;
+            var uiText = __instance.GetComponent<UnityEngine.UI.Text>();
+            if (uiText == null || string.IsNullOrEmpty(uiText.text)) return true;
+
+            if (PersianText.ContainsPersian(uiText.text) || PersianText.HasPresentationForms(uiText.text))
+            {
+                uiText.lineSpacing = 1.05f;
+                return false; // Skip original AlignText that sets lineSpacing = -0.33f
+            }
+            return true;
+        }
+
+        internal static bool FixVerticalAlignKeymapPrefix(FixVerticalAlign __instance)
+        {
+            if (__instance == null) return true;
+            var uiText = __instance.GetComponent<UnityEngine.UI.Text>();
+            if (uiText == null || string.IsNullOrEmpty(uiText.text)) return true;
+
+            if (PersianText.ContainsPersian(uiText.text) || PersianText.HasPresentationForms(uiText.text))
+            {
+                uiText.lineSpacing = 1.05f;
+                return false;
+            }
+            return true;
         }
 
         // --- RTL Typewriter Animation for DialogueBox ---

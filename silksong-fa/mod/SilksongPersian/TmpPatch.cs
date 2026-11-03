@@ -517,7 +517,12 @@ namespace SilksongPersian
 
             if (PersianText.ContainsPersian(value) || PersianText.HasPresentationForms(value))
             {
-                instance.alignment = ToRightAlignment(instance.alignment);
+                // Only convert Left alignment to Right for multi-line paragraphs (cards, tooltips, dialogue).
+                // Single-line text (buttons, prompts, inline labels) retains original layout alignment.
+                if (value.Contains('\n') || value.Contains("<br>"))
+                {
+                    instance.alignment = ToRightAlignment(instance.alignment);
+                }
             }
         }
 
@@ -527,7 +532,8 @@ namespace SilksongPersian
             string txt = __instance.text;
             if (string.IsNullOrEmpty(txt)) return;
 
-            if (PersianText.ContainsPersian(txt) || PersianText.HasPresentationForms(txt))
+            if ((PersianText.ContainsPersian(txt) || PersianText.HasPresentationForms(txt)) &&
+                (txt.Contains('\n') || txt.Contains("<br>")))
             {
                 value = ToRightAlignment(value);
             }

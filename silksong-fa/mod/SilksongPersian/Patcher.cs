@@ -61,6 +61,13 @@ namespace SilksongPersian
             Bind(harmony, typeof(DialogueBox), "PrintText",
                 prefix: AccessTools.Method(typeof(RtlPatch), nameof(RtlPatch.DialogueBoxPrintTextPrefix)),
                 argumentTypes: new[] { typeof(TMProOld.TMP_TextInfo), typeof(int) });
+
+            // FixVerticalAlign (prevents negative line spacing from crushing Persian multi-line descriptions)
+            Bind(harmony, typeof(FixVerticalAlign), "AlignText",
+                prefix: AccessTools.Method(typeof(RtlPatch), nameof(RtlPatch.FixVerticalAlignPrefix)));
+
+            Bind(harmony, typeof(FixVerticalAlign), "AlignTextKeymap",
+                prefix: AccessTools.Method(typeof(RtlPatch), nameof(RtlPatch.FixVerticalAlignKeymapPrefix)));
         }
 
         private static void Bind(Harmony harmony, Type type, string name,

@@ -71,7 +71,7 @@ namespace PackBuilder
 
                 // Menus, Options descriptions:
                 case "MainMenu":
-                    return 42;
+                    return 55;
 
                 case "General":
                     return 0;
