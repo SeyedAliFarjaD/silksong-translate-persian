@@ -170,10 +170,10 @@ namespace SilksongPersian
             {
                 EnsureTmProOldFallback(__instance);
 
-                // PromptMarker label must ALWAYS remain Left aligned next to the button icon!
+                // PromptMarker overhead prompt (talk, inspect, etc.) must ALWAYS remain Center aligned between the ornamental flourishes!
                 if (__instance.GetComponentInParent<PromptMarker>() != null)
                 {
-                    __instance.alignment = TMProOld.TextAlignmentOptions.Left;
+                    __instance.alignment = TMProOld.TextAlignmentOptions.Center;
                     return;
                 }
 
@@ -199,7 +199,7 @@ namespace SilksongPersian
 
                 if (__instance.GetComponentInParent<PromptMarker>() != null)
                 {
-                    __instance.alignment = TMProOld.TextAlignmentOptions.Left;
+                    __instance.alignment = TMProOld.TextAlignmentOptions.Center;
                     return;
                 }
 
@@ -220,7 +220,7 @@ namespace SilksongPersian
 
             if (__instance.GetComponentInParent<PromptMarker>() != null)
             {
-                value = TMProOld.TextAlignmentOptions.Left;
+                value = TMProOld.TextAlignmentOptions.Center;
                 return;
             }
 
